@@ -9,6 +9,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.6, 3.7, 3.8]
+        env-backend: [numpy, qibotf]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v1
@@ -26,7 +27,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install pylint
         pip install pytest-cov
-        pip install .[qibotf,docs,tests]
+        pip install .[${{ matrix.env-backend }},docs,tests]
     - name: Install package on Windows
       if: startsWith(matrix.os, 'windows')
       run: |
@@ -41,11 +42,11 @@ jobs:
       run: |
         pytest --cov=qibo --cov-report=xml --pyargs qibo
     - name: Test examples
-      if: startsWith(matrix.os, 'ubuntu') && matrix.python-version == '3.8'
+      if: startsWith(matrix.os, 'ubuntu') && matrix.python-version == '3.8' && matrix.env-backend == 'qibotf'
       run: |
         pytest examples/
     - name: Upload coverage to Codecov
-      if: startsWith(matrix.os, 'ubuntu')
+      if: startsWith(matrix.os, 'ubuntu') && matrix.env-backend == 'qibotf'
       uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
